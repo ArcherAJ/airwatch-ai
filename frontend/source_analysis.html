@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source Analysis - AirWatch AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/holographic.css">
+    <link rel="stylesheet" href="css/modern-ui.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="assets/icons/airwatch-logo.png" alt="AirWatch AI">
+                <div class="brand-text">
+                    <h1>AirWatch AI</h1>
+                    <span>Delhi-NCR Monitor</span>
+                </div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="source_analysis.html" class="nav-link active">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Source Analysis</span>
+                </a>
+                <a href="forecasting.html" class="nav-link">
+                    <i class="fas fa-cloud-sun"></i>
+                    <span>AI Forecasting</span>
+                </a>
+                <a href="citizen_portal.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Citizen Portal</span>
+                </a>
+                <a href="policy_dashboard.html" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Policy Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="btn-back-home" onclick="window.location.href='index.html'">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </button>
+                <button class="btn-theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1>Pollution Source Analysis</h1>
+                <p>Deep dive into pollution sources with AI-powered identification and impact assessment</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Delhi AQI</span>
+                    <span class="stat-value aqi-poor">287</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Active Alerts</span>
+                    <span class="stat-value alerts">12</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Grid -->
+        <div class="analysis-grid">
+            <!-- AI Source Detection Panel -->
+            <div class="analysis-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-search"></i>
+                        <span>AI SOURCE DETECTION</span>
+                    </div>
+                    <div class="panel-status">
+                        <span class="status-dot active"></span>
+                        <span>Live</span>
+                    </div>
+                </div>
+                
+                <div class="panel-content">
+                    <!-- Analysis Confidence -->
+                    <div class="confidence-section">
+                        <div class="confidence-header">
+                            <span class="confidence-label">Analysis Confidence</span>
+                            <span class="confidence-value">85.0%</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: 85%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Seasonal Context -->
+                    <div class="seasonal-context">
+                        <h4>Seasonal Context</h4>
+                        <div class="context-item">
+                            <span class="context-label">Season:</span>
+                            <span class="context-value">Monsoon</span>
+                        </div>
+                        <div class="context-item">
+                            <span class="context-label">Primary Concern:</span>
+                            <span class="context-value">Industrial Emissions</span>
+                        </div>
+                    </div>
+
+                    <!-- Identified Sources -->
+                    <div class="identified-sources">
+                        <h4>Identified Sources</h4>
+                        <div class="sources-list">
+                            <div class="source-item">
+                                <div class="source-info">
+                                    <span class="source-name">Stubble Burning</span>
+                                    <span class="source-location">Fatehabad District, Haryana</span>
+                                </div>
+                                <div class="source-metrics">
+                                    <span class="source-confidence">Confidence: 100.0%</span>
+                                    <span class="source-contribution">Contribution: 40%</span>
+                                </div>
+                            </div>
+                            <div class="source-item">
+                                <div class="source-info">
+                                    <span class="source-name">Industrial</span>
+                                    <span class="source-location">Narela Industrial Area</span>
+                                </div>
+                                <div class="source-metrics">
+                                    <span class="source-confidence">Confidence: 85.0%</span>
+                                    <span class="source-contribution">Contribution: 25%</span>
+                                </div>
+                            </div>
+                            <div class="source-item">
+                                <div class="source-info">
+                                    <span class="source-name">Vehicular</span>
+                                    <span class="source-location">ITO Junction</span>
+                                </div>
+                                <div class="source-metrics">
+                                    <span class="source-confidence">Confidence: 75.0%</span>
+                                    <span class="source-contribution">Contribution: 35%</span>
+                                </div>
+                            </div>
+                            <div class="source-item">
+                                <div class="source-info">
+                                    <span class="source-name">Construction</span>
+                                    <span class="source-location">Noida Construction Sites</span>
+                                </div>
+                                <div class="source-metrics">
+                                    <span class="source-confidence">Confidence: 80.0%</span>
+                                    <span class="source-contribution">Contribution: 20%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holographic Source Analysis Panel -->
+            <div class="analysis-panel holographic-card">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-cube"></i>
+                        <span>HOLOGRAPHIC SOURCE ANALYSIS</span>
+                    </div>
+                </div>
+                
+                <div class="panel-content">
+                    <!-- Holographic Container -->
+                    <div id="holographicContainer" class="holographic-container">
+                        <div class="holographic-placeholder">
+                            Source Impact Distribution
+                        </div>
+                    </div>
+                    
+                    <!-- Holographic Controls -->
+                    <div class="holographic-controls">
+                        <button class="holographic-btn" id="holographicToggle">
+                            <i class="fas fa-magic"></i>
+                            <span>Toggle Holographic</span>
+                        </button>
+                        <button class="holographic-btn" id="3DToggle">
+                            <i class="fas fa-cube"></i>
+                            <span>Toggle 3D</span>
+                        </button>
+                        <button class="holographic-btn" id="refreshHolographic">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/navigation.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/particle-effects.js"></script>
+    <script src="js/holographic-charts.js"></script>
+    <script src="js/source-analysis.js"></script>
+</body>
+</html>

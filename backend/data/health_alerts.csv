@@ -1,0 +1,13 @@
+id,aqi_range,category,health_advisory,recommended_actions,affected_groups,timestamp
+1,0-50,Good,Minimal health impact,Enjoy outdoor activities,All,2023-10-05 08:30:00
+2,51-100,Satisfactory,Minor breathing discomfort,Outdoor activities okay for most,Children,elderly,asthmatics,2023-10-05 08:30:00
+3,101-200,Moderate,Breathing discomfort for sensitive groups,Limit outdoor activities for sensitive groups,Children,elderly,asthmatics,heart_patients,2023-10-05 08:30:00
+4,201-300,Poor,Breathing discomfort for most people,Avoid outdoor activities for sensitive groups,All,2023-10-05 08:30:00
+5,301-400,Very Poor,Respiratory illness on prolonged exposure,Avoid outdoor activities for all,All,2023-10-05 08:30:00
+6,401-500,Severe,Health emergency,Stay indoors,All,2023-10-05 08:30:00
+7,0-50,Good,Minimal health impact,Wear N95 masks if sensitive,All,2023-10-05 08:30:00
+8,51-100,Satisfactory,Minor breathing discomfort,Use air purifiers indoors,Children,elderly,asthmatics,2023-10-05 08:30:00
+9,101-200,Moderate,Breathing discomfort for sensitive groups,Keep windows closed,Children,elderly,asthmatics,heart_patients,2023-10-05 08:30:00
+10,201-300,Poor,Breathing discomfort for most people,Use air purifiers,All,2023-10-05 08:30:00
+11,301-400,Very Poor,Respiratory illness on prolonged exposure,Stay indoors with air purifiers,All,2023-10-05 08:30:00
+12,401-500,Severe,Health emergency,Emergency measures required,All,2023-10-05 08:30:00

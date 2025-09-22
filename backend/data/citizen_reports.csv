@@ -1,0 +1,4 @@
+id,user_id,location,issue_type,description,status,created_at
+1,1001,Okhla Industrial Area,Industrial Smoke,Heavy black smoke from factory in Okhla Industrial Area,Verified,2023-10-05 07:45:00
+2,1002,Dwarka,Construction Dust,Uncovered construction site causing dust pollution in Dwarka,Under Review,2023-10-05 06:30:00
+3,1003,Rohini Sector 24,Garbage Burning,Regular garbage burning in Rohini Sector 24 park,New,2023-10-05 05:15:00

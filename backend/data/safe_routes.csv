@@ -1,0 +1,11 @@
+id,origin,destination,route_type,avg_aqi,pm25_level,pm10_level,traffic_density,green_coverage,recommended_time,duration_minutes,timestamp
+1,Connaught_Place,India_Gate,cycling,145,45.2,78.9,0.6,0.8,Morning,15,2023-10-05 08:30:00
+2,India_Gate,Lodhi_Garden,walking,132,38.7,72.3,0.3,0.9,Evening,25,2023-10-05 08:30:00
+3,Karol_Bagh,Connaught_Place,cycling,158,52.1,89.4,0.7,0.5,Morning,20,2023-10-05 08:30:00
+4,Delhi_Gate,Red_Fort,walking,167,58.3,95.2,0.8,0.4,Evening,18,2023-10-05 08:30:00
+5,Gurgaon_Highway,Dwarka,driving,189,67.8,112.6,0.9,0.3,Off_peak,35,2023-10-05 08:30:00
+6,Noida_Sector_18,Greater_Noida,driving,198,72.4,118.9,0.8,0.4,Off_peak,45,2023-10-05 08:30:00
+7,Rajouri_Garden,Janpath,cycling,143,46.8,81.2,0.5,0.6,Morning,22,2023-10-05 08:30:00
+8,Laxmi_Nagar,Connaught_Place,cycling,162,54.7,92.8,0.6,0.5,Morning,28,2023-10-05 08:30:00
+9,Anand_Parbat,Karol_Bagh,driving,178,61.2,98.5,0.7,0.4,Off_peak,25,2023-10-05 08:30:00
+10,Okhla_Industrial,Greater_Kailash,driving,234,89.6,156.7,0.8,0.2,Off_peak,40,2023-10-05 08:30:00

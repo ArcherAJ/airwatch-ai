@@ -1,0 +1,11 @@
+id,source_type,location,contribution_percent,pollutants,confidence,impact_level,control_measures,last_detected,timestamp
+1,Vehicular,ITO Junction,32,"PM2.5,NOx,CO",0.85,High,"Traffic management,odd-even",2023-10-05 08:30:00,2023-10-05 08:30:00
+2,Industrial,Mayapuri Industrial Area,24,"SO2,PM2.5",0.92,High,"Emission controls,scrubbers",2023-10-05 08:30:00,2023-10-05 08:30:00
+3,Construction,Dwarka Expressway,19,"PM10,PM2.5",0.78,Medium,"Dust suppression,water sprinkling",2023-10-05 08:30:00,2023-10-05 08:30:00
+4,Stubble Burning,Punjab-Haryana Border,15,"PM2.5,PM10,CO",0.95,High,"Satellite monitoring,incentives",2023-10-05 08:30:00,2023-10-05 08:30:00
+5,Dust,Various locations,7,PM10,0.65,Medium,"Street cleaning,greening",2023-10-05 08:30:00,2023-10-05 08:30:00
+6,Other,Miscellaneous,3,Various,0.45,Low,"General measures,awareness",2023-10-05 08:30:00,2023-10-05 08:30:00
+7,Power Plants,NTPC Badarpur,12,"SO2,PM2.5,NOx",0.88,High,"Flue gas treatment,emission limits",2023-10-05 08:30:00,2023-10-05 08:30:00
+8,Waste Burning,Landfill sites,8,"PM2.5,PM10,CO",0.72,Medium,"Waste management,biomining",2023-10-05 08:30:00,2023-10-05 08:30:00
+9,Domestic,Residential areas,5,"PM2.5,CO",0.58,Medium,"LPG promotion,awareness",2023-10-05 08:30:00,2023-10-05 08:30:00
+10,Biomass,Cooking and heating,4,"PM2.5,CO",0.62,Low,"Clean fuel promotion,subsidies",2023-10-05 08:30:00,2023-10-05 08:30:00

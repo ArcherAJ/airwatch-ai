@@ -1,0 +1,6 @@
+id,name,policy_type,start_date,end_date,status,effectiveness_score,aqi_reduction,areas_covered
+1,Odd-Even Vehicle Policy,Vehicular Restriction,2023-11-01,,Active,8.7,32,Central Delhi
+2,Industrial Emission Standards,Industrial Regulation,2023-09-15,,Active,7.8,24,NCR Region
+3,Construction Dust Control,Dust Management,2023-08-01,,Active,7.2,18,All Delhi
+4,Green Delhi App,Citizen Engagement,2023-07-01,,Active,6.9,12,NCR Region
+5,Smog Tower Installation,Infrastructure,2023-12-15,,Planning,,,Connaught Place

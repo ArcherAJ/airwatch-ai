@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirWatch AI - Delhi-NCR Pollution Monitoring</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/holographic.css">
+    <link rel="stylesheet" href="css/modern-ui.css">
+    <link rel="stylesheet" href="css/theme-system.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>AirWatch AI</h2>
+                    <span>Delhi-NCR Monitor</span>
+                </div>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#dashboard" class="nav-link">Dashboard</a>
+                <a href="#forecast" class="nav-link">Forecast</a>
+                <a href="#alerts" class="nav-link">Alerts</a>
+                <a href="#community" class="nav-link">Community</a>
+                <a href="#about" class="nav-link">About</a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="btn-notification" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="theme-toggle-container">
+                    <button class="btn-theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="theme-menu" id="themeMenu">
+                        <div class="theme-option active" data-theme="dark">
+                            <i class="fas fa-moon"></i>
+                            <span>Dark</span>
+                        </div>
+                        <div class="theme-option" data-theme="light">
+                            <i class="fas fa-sun"></i>
+                            <span>Light</span>
+                        </div>
+                        <div class="theme-option" data-theme="auto">
+                            <i class="fas fa-adjust"></i>
+                            <span>Auto</span>
+                        </div>
+                        <div class="theme-separator"></div>
+                        <div class="theme-option" id="themeSchedule">
+                            <i class="fas fa-clock"></i>
+                            <span>Schedule</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="nav-toggle" id="navToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-background">
+            <canvas id="heroCanvas"></canvas>
+            <div class="hero-particles"></div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    <span class="gradient-text">AirWatch AI</span>
+                    <br>Delhi-NCR Pollution Monitor
+                </h1>
+                <p class="hero-subtitle">
+                    Real-time air quality monitoring, AI-powered forecasting, and personalized health insights for a cleaner, healthier Delhi-NCR.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn-primary" onclick="scrollToSection('dashboard')">
+                        <i class="fas fa-chart-line"></i>
+                        View Dashboard
+                    </button>
+                    <button class="btn-secondary" onclick="scrollToSection('alerts')">
+                        <i class="fas fa-bell"></i>
+                        Get Alerts
+                    </button>
+                </div>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat-card holographic-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="currentAQI">287</div>
+                        <div class="stat-label">Current AQI</div>
+                        <div class="stat-trend trend-increasing">
+                            <i class="fas fa-arrow-up"></i> +12
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card holographic-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="activeAlerts">12</div>
+                        <div class="stat-label">Active Alerts</div>
+                        <div class="stat-trend trend-critical">
+                            <i class="fas fa-exclamation"></i> Critical
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card holographic-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="monitoringStations">45</div>
+                        <div class="stat-label">Monitoring Stations</div>
+                        <div class="stat-trend trend-stable">
+                            <i class="fas fa-check"></i> Online
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-scroll">
+            <div class="scroll-indicator">
+                <div class="scroll-line"></div>
+                <span>Scroll to explore</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Pollution Map -->
+    <section class="pollution-map" id="dashboard">
+        <div class="section-header">
+            <h2 class="section-title">Live Pollution Heatmap</h2>
+            <p class="section-subtitle">Real-time air quality data across Delhi-NCR</p>
+        </div>
+        
+        <div class="map-container holographic-theme">
+            <div class="map-controls">
+                <div class="control-group">
+                    <button class="control-btn active" data-layer="pm25">
+                        <i class="fas fa-circle"></i> PM2.5
+                    </button>
+                    <button class="control-btn" data-layer="pm10">
+                        <i class="fas fa-circle"></i> PM10
+                    </button>
+                    <button class="control-btn" data-layer="aqi">
+                        <i class="fas fa-circle"></i> AQI
+                    </button>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn" data-time="current">
+                        <i class="fas fa-clock"></i> Current
+                    </button>
+                    <button class="control-btn" data-time="24h">
+                        <i class="fas fa-history"></i> 24h Avg
+                    </button>
+                    <button class="control-btn" data-time="7d">
+                        <i class="fas fa-calendar"></i> 7-day
+                    </button>
+                </div>
+            </div>
+            
+            <div class="map-visualization">
+                <canvas id="pollutionMapCanvas"></canvas>
+                <div class="map-overlay">
+                    <div class="map-legend">
+                        <div class="legend-title">Air Quality Index</div>
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <div class="legend-color aqi-good"></div>
+                                <span>Good (0-50)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color aqi-satisfactory"></div>
+                                <span>Satisfactory (51-100)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color aqi-moderate"></div>
+                                <span>Moderate (101-200)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color aqi-poor"></div>
+                                <span>Poor (201-300)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color aqi-very-poor"></div>
+                                <span>Very Poor (301-400)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color aqi-severe"></div>
+                                <span>Severe (401+)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Forecasting Section -->
+    <section class="forecast-section" id="forecast">
+        <div class="section-header">
+            <h2 class="section-title">AI-Powered Forecasting</h2>
+            <p class="section-subtitle">Predictive insights for the next 72 hours</p>
+        </div>
+        
+        <div class="forecast-container">
+            <div class="forecast-timeline">
+                <div class="timeline-header">
+                    <h3>Hourly Forecast</h3>
+                    <div class="timeline-controls">
+                        <button class="btn-timeline active" data-period="24h">24H</button>
+                        <button class="btn-timeline" data-period="48h">48H</button>
+                        <button class="btn-timeline" data-period="72h">72H</button>
+                    </div>
+                </div>
+                <div class="timeline-chart">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="forecast-insights">
+                <div class="insight-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-brain"></i>
+                        <h4>AI Analysis</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="insight-item">
+                            <span class="insight-label">Primary Concern:</span>
+                            <span class="insight-value">Stubble Burning</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Confidence:</span>
+                            <span class="insight-value">87%</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Peak Time:</span>
+                            <span class="insight-value">6-9 AM</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Recommendation:</span>
+                            <span class="insight-value">Limit outdoor activities</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="insight-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-cloud-rain"></i>
+                        <h4>Weather Impact</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="weather-item">
+                            <div class="weather-icon">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <div class="weather-info">
+                                <span class="weather-label">Wind Speed</span>
+                                <span class="weather-value">8 km/h</span>
+                            </div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-icon">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            <div class="weather-info">
+                                <span class="weather-label">Temperature</span>
+                                <span class="weather-value">22°C</span>
+                            </div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-icon">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="weather-info">
+                                <span class="weather-label">Humidity</span>
+                                <span class="weather-value">65%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Alerts Section -->
+    <section class="alerts-section" id="alerts">
+        <div class="section-header">
+            <h2 class="section-title">Health Alerts & Recommendations</h2>
+            <p class="section-subtitle">Personalized health guidance based on current air quality</p>
+        </div>
+        
+        <div class="alerts-container">
+            <div class="alert-priority">
+                <div class="priority-card critical">
+                    <div class="priority-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Critical Alert</h3>
+                        <span class="priority-badge">Immediate Action</span>
+                    </div>
+                    <div class="priority-content">
+                        <p>AQI levels have reached 287 (Poor category). Limit outdoor activities and use N95 masks.</p>
+                        <div class="priority-actions">
+                            <button class="btn-action">
+                                <i class="fas fa-mask"></i>
+                                Get Mask Guidance
+                            </button>
+                            <button class="btn-action">
+                                <i class="fas fa-route"></i>
+                                Find Safe Routes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="health-recommendations">
+                <div class="recommendation-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-heart"></i>
+                        <h4>For General Population</h4>
+                    </div>
+                    <div class="card-content">
+                        <ul class="recommendation-list">
+                            <li><i class="fas fa-check"></i> Avoid outdoor physical activities</li>
+                            <li><i class="fas fa-check"></i> Keep windows and doors closed</li>
+                            <li><i class="fas fa-check"></i> Use air purifiers indoors</li>
+                            <li><i class="fas fa-check"></i> Wear N95 masks when going out</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="recommendation-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-child"></i>
+                        <h4>For Sensitive Groups</h4>
+                    </div>
+                    <div class="card-content">
+                        <ul class="recommendation-list">
+                            <li><i class="fas fa-check"></i> Stay indoors as much as possible</li>
+                            <li><i class="fas fa-check"></i> Consult doctor if symptoms worsen</li>
+                            <li><i class="fas fa-check"></i> Keep emergency medications ready</li>
+                            <li><i class="fas fa-check"></i> Use HEPA air purifiers</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="recommendation-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-running"></i>
+                        <h4>For Athletes & Active People</h4>
+                    </div>
+                    <div class="card-content">
+                        <ul class="recommendation-list">
+                            <li><i class="fas fa-check"></i> Move workouts indoors</li>
+                            <li><i class="fas fa-check"></i> Reduce exercise intensity</li>
+                            <li><i class="fas fa-check"></i> Stay hydrated</li>
+                            <li><i class="fas fa-check"></i> Monitor breathing patterns</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section class="community-section" id="community">
+        <div class="section-header">
+            <h2 class="section-title">Community Engagement</h2>
+            <p class="section-subtitle">Join the fight against air pollution</p>
+        </div>
+        
+        <div class="community-container">
+            <div class="community-stats">
+                <div class="stat-card holographic-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">12,547</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card holographic-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">8,923</div>
+                        <div class="stat-label">Eco Actions</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card holographic-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">Green Points</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="community-features">
+                <div class="feature-card holographic-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Report Pollution</h4>
+                        <p>Upload photos of pollution sources and get verified by our AI system.</p>
+                        <button class="btn-feature">Report Now</button>
+                    </div>
+                </div>
+                
+                <div class="feature-card holographic-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Eco Challenges</h4>
+                        <p>Complete daily challenges and earn green points for sustainable actions.</p>
+                        <button class="btn-feature">Join Challenge</button>
+                    </div>
+                </div>
+                
+                <div class="feature-card holographic-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Community Forum</h4>
+                        <p>Connect with like-minded individuals and share environmental tips.</p>
+                        <button class="btn-feature">Join Forum</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h3>AirWatch AI</h3>
+                        <p>Delhi-NCR Pollution Monitor</p>
+                    </div>
+                </div>
+                <p class="footer-description">
+                    Empowering citizens with real-time air quality data and AI-powered insights for a healthier Delhi-NCR.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#forecast">Forecast</a></li>
+                    <li><a href="#alerts">Health Alerts</a></li>
+                    <li><a href="#community">Community</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="#">API Documentation</a></li>
+                    <li><a href="#">Mobile App</a></li>
+                    <li><a href="#">Data Sources</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 AirWatch AI. All rights reserved.</p>
+            <p>Powered by AI & Machine Learning</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/modern-ui.js"></script>
+    <script src="js/hero-animations.js"></script>
+    <script src="js/pollution-map.js"></script>
+    <script src="js/forecast-chart.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/theme-toggle.js"></script>
+    <script src="js/navigation-system.js"></script>
+    <script src="js/api.js"></script>
+</body>
+</html>

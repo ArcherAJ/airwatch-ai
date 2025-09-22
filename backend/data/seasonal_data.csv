@@ -1,0 +1,13 @@
+id,season,month,primary_source,avg_aqi,stubble_burning_intensity,festival_impact,construction_activity,traffic_pattern,recommended_policies
+1,Monsoon,6,Industrial,145,0,0,0.3,0.7,Industrial_emission_control
+2,Monsoon,7,Industrial,138,0,0,0.2,0.6,Industrial_emission_control
+3,Monsoon,8,Industrial,142,0,0,0.4,0.8,Industrial_emission_control
+4,Post_Monsoon,9,Vehicular,167,0.2,0.1,0.6,0.9,Traffic_management
+5,Post_Monsoon,10,Stubble_Burning,245,0.8,0.3,0.7,0.8,Stubble_burning_control
+6,Post_Monsoon,11,Stubble_Burning,278,0.9,0.4,0.8,0.7,Stubble_burning_control
+7,Winter,12,Mixed,312,0.6,0.5,0.5,0.9,Comprehensive_measures
+8,Winter,1,Mixed,298,0.4,0.3,0.4,0.8,Comprehensive_measures
+9,Winter,2,Mixed,285,0.3,0.2,0.5,0.7,Comprehensive_measures
+10,Summer,3,Dust,234,0.1,0.1,0.8,0.6,Dust_control_measures
+11,Summer,4,Dust,198,0,0,0.9,0.7,Dust_control_measures
+12,Summer,5,Vehicular,156,0,0,0.7,0.8,Traffic_management
