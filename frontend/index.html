@@ -173,15 +173,38 @@
                     </button>
                 </div>
                 <div class="control-group">
-                    <button class="control-btn" data-time="current">
-                        <i class="fas fa-clock"></i> Current
+                    <button class="control-btn active" data-time="current">
+                        <i class="fas fa-clock"></i> Live
+                    </button>
+                    <button class="control-btn" data-time="timelapse">
+                        <i class="fas fa-play"></i> Time-lapse
                     </button>
                     <button class="control-btn" data-time="24h">
                         <i class="fas fa-history"></i> 24h Avg
                     </button>
-                    <button class="control-btn" data-time="7d">
-                        <i class="fas fa-calendar"></i> 7-day
-                    </button>
+                </div>
+                <div class="control-group">
+                    <div class="intensity-control">
+                        <label for="heatmapIntensity">Heat Intensity:</label>
+                        <input type="range" id="heatmapIntensity" min="0" max="1" step="0.1" value="0.8">
+                        <span class="intensity-value">80%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="playback-controls" id="playbackControls" style="display: none;">
+                        <button class="playback-btn" id="playPauseBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="speed-control">
+                            <label>Speed:</label>
+                            <select id="playbackSpeed">
+                                <option value="0.5">0.5x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="2">2x</option>
+                                <option value="4">4x</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
             

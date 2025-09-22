@@ -1,15 +1,25 @@
-// Interactive Pollution Map for AirWatch AI
+// Enhanced Interactive Pollution Heat Map for AirWatch AI
 
 class PollutionMap {
     constructor() {
         this.canvas = null;
         this.ctx = null;
         this.data = [];
+        this.historicalData = [];
         this.currentLayer = 'aqi';
         this.currentTime = 'current';
         this.mousePosition = { x: 0, y: 0 };
         this.selectedStation = null;
         this.animationId = null;
+        this.particles = [];
+        this.windVectors = [];
+        this.heatmapIntensity = 0.8;
+        this.isPlaying = false;
+        this.playbackSpeed = 1;
+        this.currentTimeIndex = 0;
+        this.timeRange = 24; // hours
+        this.updateInterval = null;
+        this.lastUpdate = Date.now();
         this.init();
     }
 
@@ -18,7 +28,10 @@ class PollutionMap {
         this.setupControls();
         this.loadData();
         this.setupEventListeners();
+        this.initializeParticles();
+        this.initializeWindVectors();
         this.startAnimation();
+        this.startRealTimeUpdates();
     }
 
     createCanvas() {
@@ -64,12 +77,20 @@ class PollutionMap {
 
     async loadData() {
         try {
-            const response = await fetch('/api/overview/current-aqi');
-            const data = await response.json();
-            this.data = data.stations || this.generateMockData();
+            // Load current data
+            const currentResponse = await fetch('/api/overview/current-aqi');
+            const currentData = await currentResponse.json();
+            this.data = currentData.stations || this.generateMockData();
+            
+            // Load historical data for time-lapse
+            const historicalResponse = await fetch('/api/overview/visualization-data');
+            const historicalData = await historicalResponse.json();
+            this.historicalData = historicalData.time_series || this.generateHistoricalData();
+            
         } catch (error) {
             console.log('Using mock data for pollution map');
             this.data = this.generateMockData();
+            this.historicalData = this.generateHistoricalData();
         }
     }
 
@@ -98,6 +119,94 @@ class PollutionMap {
         });
 
         return stations;
+    }
+
+    generateHistoricalData() {
+        const historicalData = [];
+        const now = new Date();
+        
+        for (let i = 0; i < this.timeRange; i++) {
+            const timestamp = new Date(now.getTime() - (this.timeRange - i) * 60 * 60 * 1000);
+            const hourData = [];
+            
+            this.data.forEach(station => {
+                // Simulate realistic pollution patterns
+                const baseAqi = station.aqi;
+                const hourVariation = Math.sin((i / this.timeRange) * Math.PI * 2) * 50;
+                const randomVariation = (Math.random() - 0.5) * 30;
+                
+                hourData.push({
+                    ...station,
+                    aqi: Math.max(0, Math.min(500, baseAqi + hourVariation + randomVariation)),
+                    pm25: Math.max(0, station.pm25 + hourVariation * 0.5 + randomVariation * 0.3),
+                    pm10: Math.max(0, station.pm10 + hourVariation * 0.7 + randomVariation * 0.4),
+                    timestamp: timestamp.toISOString()
+                });
+            });
+            
+            historicalData.push({
+                timestamp: timestamp.toISOString(),
+                stations: hourData
+            });
+        }
+        
+        return historicalData;
+    }
+
+    initializeParticles() {
+        this.particles = [];
+        for (let i = 0; i < 50; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                size: Math.random() * 3 + 1,
+                opacity: Math.random() * 0.5 + 0.2,
+                color: this.getRandomPollutionColor()
+            });
+        }
+    }
+
+    initializeWindVectors() {
+        this.windVectors = [];
+        const gridSize = 50;
+        
+        for (let x = 0; x < this.canvas.width; x += gridSize) {
+            for (let y = 0; y < this.canvas.height; y += gridSize) {
+                this.windVectors.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    strength: Math.random() * 0.8 + 0.2
+                });
+            }
+        }
+    }
+
+    getRandomPollutionColor() {
+        const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#dc2626', '#7c2d12'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    startRealTimeUpdates() {
+        this.updateInterval = setInterval(() => {
+            this.updateRealTimeData();
+        }, 30000); // Update every 30 seconds
+    }
+
+    updateRealTimeData() {
+        // Simulate real-time updates
+        this.data.forEach(station => {
+            const variation = (Math.random() - 0.5) * 20;
+            station.aqi = Math.max(0, Math.min(500, station.aqi + variation));
+            station.pm25 = Math.max(0, station.pm25 + variation * 0.5);
+            station.pm10 = Math.max(0, station.pm10 + variation * 0.7);
+            station.timestamp = new Date().toISOString();
+        });
+        
+        this.lastUpdate = Date.now();
     }
 
     setupEventListeners() {
@@ -137,8 +246,14 @@ class PollutionMap {
         // Draw background
         this.drawBackground();
         
+        // Draw wind vectors
+        this.drawWindVectors();
+        
         // Draw pollution heatmap
         this.drawHeatmap();
+        
+        // Draw particles
+        this.drawParticles();
         
         // Draw stations
         this.drawStations();
@@ -148,6 +263,12 @@ class PollutionMap {
         
         // Draw mouse interaction
         this.drawMouseInteraction();
+        
+        // Draw time controls
+        this.drawTimeControls();
+        
+        // Draw real-time indicator
+        this.drawRealTimeIndicator();
     }
 
     drawBackground() {
@@ -159,6 +280,54 @@ class PollutionMap {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
+    drawWindVectors() {
+        this.ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+        this.ctx.lineWidth = 1;
+        
+        this.windVectors.forEach(vector => {
+            const length = Math.sqrt(vector.vx * vector.vx + vector.vy * vector.vy) * 10;
+            const angle = Math.atan2(vector.vy, vector.vx);
+            
+            this.ctx.save();
+            this.ctx.translate(vector.x, vector.y);
+            this.ctx.rotate(angle);
+            
+            // Draw arrow
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(length, 0);
+            this.ctx.moveTo(length - 5, -3);
+            this.ctx.lineTo(length, 0);
+            this.ctx.lineTo(length - 5, 3);
+            this.ctx.stroke();
+            
+            this.ctx.restore();
+        });
+    }
+
+    drawParticles() {
+        this.particles.forEach(particle => {
+            // Update particle position
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            
+            // Wrap around screen
+            if (particle.x < 0) particle.x = this.canvas.width;
+            if (particle.x > this.canvas.width) particle.x = 0;
+            if (particle.y < 0) particle.y = this.canvas.height;
+            if (particle.y > this.canvas.height) particle.y = 0;
+            
+            // Draw particle
+            this.ctx.save();
+            this.ctx.globalAlpha = particle.opacity;
+            this.ctx.fillStyle = particle.color;
+            this.ctx.beginPath();
+            this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+        });
+    }
+
     drawHeatmap() {
         this.data.forEach(station => {
             const x = station.x * this.canvas.width;
@@ -166,15 +335,30 @@ class PollutionMap {
             const value = this.getStationValue(station);
             const color = this.getValueColor(value);
             
-            // Create radial gradient for heatmap effect
-            const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, 80);
-            gradient.addColorStop(0, color + '40');
-            gradient.addColorStop(0.5, color + '20');
-            gradient.addColorStop(1, 'transparent');
+            // Enhanced heatmap with multiple layers
+            const radius = 100;
+            const intensity = this.heatmapIntensity;
             
-            this.ctx.fillStyle = gradient;
+            // Outer glow
+            const outerGradient = this.ctx.createRadialGradient(x, y, 0, x, y, radius);
+            outerGradient.addColorStop(0, color + Math.floor(60 * intensity).toString(16).padStart(2, '0'));
+            outerGradient.addColorStop(0.3, color + Math.floor(40 * intensity).toString(16).padStart(2, '0'));
+            outerGradient.addColorStop(0.7, color + Math.floor(20 * intensity).toString(16).padStart(2, '0'));
+            outerGradient.addColorStop(1, 'transparent');
+            
+            this.ctx.fillStyle = outerGradient;
             this.ctx.beginPath();
-            this.ctx.arc(x, y, 80, 0, Math.PI * 2);
+            this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            // Inner core
+            const innerGradient = this.ctx.createRadialGradient(x, y, 0, x, y, radius * 0.5);
+            innerGradient.addColorStop(0, color + Math.floor(80 * intensity).toString(16).padStart(2, '0'));
+            innerGradient.addColorStop(1, 'transparent');
+            
+            this.ctx.fillStyle = innerGradient;
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, radius * 0.5, 0, Math.PI * 2);
             this.ctx.fill();
         });
     }
@@ -497,9 +681,122 @@ class PollutionMap {
         });
     }
 
+    drawTimeControls() {
+        if (this.currentTime !== 'current') {
+            const controlsY = 20;
+            const controlsX = this.canvas.width - 200;
+            
+            // Draw time control panel
+            this.ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+            this.ctx.fillRect(controlsX, controlsY, 180, 60);
+            
+            this.ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(controlsX, controlsY, 180, 60);
+            
+            // Draw play/pause button
+            const playX = controlsX + 20;
+            const playY = controlsY + 20;
+            this.ctx.fillStyle = this.isPlaying ? '#ef4444' : '#10b981';
+            this.ctx.beginPath();
+            if (this.isPlaying) {
+                // Pause icon
+                this.ctx.fillRect(playX, playY, 4, 20);
+                this.ctx.fillRect(playX + 8, playY, 4, 20);
+            } else {
+                // Play icon
+                this.ctx.moveTo(playX, playY);
+                this.ctx.lineTo(playX + 20, playY + 10);
+                this.ctx.lineTo(playX, playY + 20);
+                this.ctx.closePath();
+                this.ctx.fill();
+            }
+            
+            // Draw time info
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = '12px Inter, sans-serif';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(`Time: ${this.currentTimeIndex + 1}/${this.timeRange}h`, playX + 30, playY + 15);
+        }
+    }
+
+    drawRealTimeIndicator() {
+        const indicatorX = 20;
+        const indicatorY = 20;
+        const indicatorSize = 8;
+        
+        // Draw pulsing indicator
+        const time = Date.now() * 0.005;
+        const pulseSize = indicatorSize + Math.sin(time) * 2;
+        
+        this.ctx.fillStyle = '#10b981';
+        this.ctx.beginPath();
+        this.ctx.arc(indicatorX, indicatorY, pulseSize, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Draw "LIVE" text
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = '12px Inter, sans-serif';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText('LIVE', indicatorX + 15, indicatorY + 5);
+        
+        // Draw last update time
+        const lastUpdateSeconds = Math.floor((Date.now() - this.lastUpdate) / 1000);
+        this.ctx.fillStyle = '#94a3b8';
+        this.ctx.font = '10px Inter, sans-serif';
+        this.ctx.fillText(`Updated ${lastUpdateSeconds}s ago`, indicatorX + 15, indicatorY + 18);
+    }
+
+    togglePlayback() {
+        this.isPlaying = !this.isPlaying;
+        if (this.isPlaying) {
+            this.startTimeLapse();
+        } else {
+            this.stopTimeLapse();
+        }
+    }
+
+    startTimeLapse() {
+        this.timeLapseInterval = setInterval(() => {
+            this.currentTimeIndex = (this.currentTimeIndex + 1) % this.timeRange;
+            this.updateTimeLapseData();
+        }, 1000 / this.playbackSpeed);
+    }
+
+    stopTimeLapse() {
+        if (this.timeLapseInterval) {
+            clearInterval(this.timeLapseInterval);
+            this.timeLapseInterval = null;
+        }
+    }
+
+    updateTimeLapseData() {
+        if (this.historicalData[this.currentTimeIndex]) {
+            this.data = this.historicalData[this.currentTimeIndex].stations;
+        }
+    }
+
+    setPlaybackSpeed(speed) {
+        this.playbackSpeed = speed;
+        if (this.isPlaying) {
+            this.stopTimeLapse();
+            this.startTimeLapse();
+        }
+    }
+
+    setHeatmapIntensity(intensity) {
+        this.heatmapIntensity = Math.max(0, Math.min(1, intensity));
+    }
+
     destroy() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
+        }
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+        }
+        if (this.timeLapseInterval) {
+            clearInterval(this.timeLapseInterval);
         }
     }
 }
