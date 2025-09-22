@@ -7,6 +7,7 @@ from routes.citizen_portal import citizen_portal_bp
 from routes.policy_dashboard import policy_dashboard_bp
 from routes.modern_api import modern_api_bp
 from routes.advanced_features import advanced_features_bp
+from routes.advanced_features_enhanced import advanced_features_enhanced_bp
 from routes.comprehensive_analysis import comprehensive_bp
 from routes.realtime_data import realtime_bp
 import os
@@ -22,6 +23,7 @@ app.register_blueprint(citizen_portal_bp, url_prefix='/api/citizen-portal')
 app.register_blueprint(policy_dashboard_bp, url_prefix='/api/policy-dashboard')
 app.register_blueprint(modern_api_bp, url_prefix='/api/modern')
 app.register_blueprint(advanced_features_bp, url_prefix='/api/advanced')
+app.register_blueprint(advanced_features_enhanced_bp, url_prefix='/api/advanced')
 app.register_blueprint(comprehensive_bp, url_prefix='/api/comprehensive')
 app.register_blueprint(realtime_bp, url_prefix='/api/realtime')
 

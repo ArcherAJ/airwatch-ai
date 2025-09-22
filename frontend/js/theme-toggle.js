@@ -46,7 +46,7 @@ class ThemeManager {
         if (savedTheme) {
             this.currentTheme = savedTheme;
         } else {
-            this.currentTheme = 'auto';
+            this.currentTheme = 'dark'; // Default to dark mode instead of auto
         }
 
         if (savedSchedule) {
@@ -445,7 +445,7 @@ class ThemeManager {
     resetTheme() {
         localStorage.removeItem('airwatch-theme');
         localStorage.removeItem('airwatch-theme-schedule');
-        this.currentTheme = 'auto';
+        this.currentTheme = 'dark'; // Default to dark mode instead of auto
         this.scheduleData = null;
         this.autoSwitchEnabled = false;
         this.applyTheme();

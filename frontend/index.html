@@ -6,14 +6,22 @@
     <title>AirWatch AI - Delhi-NCR Pollution Monitoring</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <!-- Critical CSS - Load first -->
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/modern-ui.css">
+    
+    <!-- Non-critical CSS - Load after -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/holographic.css">
-    <link rel="stylesheet" href="css/modern-ui.css">
     <link rel="stylesheet" href="css/dashboard-navigation.css">
+    <link rel="stylesheet" href="css/mobile-responsive.css">
+    <link rel="stylesheet" href="css/new-sections.css">
     
     <!-- Preload critical resources -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style" class="critical-resource">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" class="critical-resource">
+    
+    <!-- Defer non-critical scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
 </head>
@@ -42,13 +50,15 @@
                 <a href="#home" class="nav-link active">Home</a>
                 <a href="#dashboard" class="nav-link">Dashboard</a>
                 <a href="#forecast" class="nav-link">Forecast</a>
+                <a href="#hyperlocal" class="nav-link">Hyperlocal</a>
+                <a href="#satellite" class="nav-link">Satellite</a>
+                <a href="#policy-dashboard" class="nav-link">Policy</a>
                 <a href="#alerts" class="nav-link">Alerts</a>
                 <a href="#community" class="nav-link">Community</a>
-                <a href="#about" class="nav-link">About</a>
             </div>
             
                 <div class="nav-actions">
-                    <button class="btn-back" onclick="goBack()" title="Go Back">
+                    <button class="btn-back" id="backButton" title="Go Back" style="display: none;">
                         <i class="fas fa-arrow-left"></i>
                         <span>Back</span>
                     </button>
@@ -58,7 +68,7 @@
                     </button>
                 <div class="theme-toggle-container">
                     <button class="btn-theme-toggle" id="themeToggle">
-                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun"></i>
                     </button>
                     <div class="theme-menu" id="themeMenu">
                         <div class="theme-option active" data-theme="dark">
@@ -80,7 +90,7 @@
                         </div>
                     </div>
                 </div>
-                <button class="nav-toggle" id="navToggle">
+                <button class="nav-toggle mobile-nav-toggle" id="navToggle">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -353,6 +363,184 @@
         </div>
     </section>
 
+    <!-- Hyperlocal AQI Section -->
+    <section class="hyperlocal-section" id="hyperlocal">
+        <div class="section-header">
+            <h2 class="section-title">Hyperlocal Air Quality</h2>
+            <p class="section-subtitle">Neighborhood-level air quality monitoring and safe route planning</p>
+        </div>
+        
+        <div class="hyperlocal-container">
+            <div class="location-selector">
+                <div class="location-input">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" id="locationInput" placeholder="Enter your location or use current location" value="Delhi, India">
+                    <button class="btn-location" id="getCurrentLocation">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                </div>
+                <div class="location-options">
+                    <button class="location-option active" data-location="central-delhi">Central Delhi</button>
+                    <button class="location-option" data-location="east-delhi">East Delhi</button>
+                    <button class="location-option" data-location="west-delhi">West Delhi</button>
+                    <button class="location-option" data-location="south-delhi">South Delhi</button>
+                    <button class="location-option" data-location="north-delhi">North Delhi</button>
+                </div>
+            </div>
+            
+            <div class="hyperlocal-grid">
+                <div class="current-aqi-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-location-dot"></i>
+                        <h4>Current Location AQI</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="aqi-display">
+                            <div class="aqi-value" id="hyperlocalAQI">287</div>
+                            <div class="aqi-category" id="hyperlocalCategory">Poor</div>
+                            <div class="aqi-confidence">
+                                <span>Confidence: </span>
+                                <span class="confidence-value" id="hyperlocalConfidence">87%</span>
+                            </div>
+                        </div>
+                        <div class="aqi-breakdown">
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">PM2.5</span>
+                                <span class="pollutant-value" id="hyperlocalPM25">112.5</span>
+                            </div>
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">PM10</span>
+                                <span class="pollutant-value" id="hyperlocalPM10">195.3</span>
+                            </div>
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">NO2</span>
+                                <span class="pollutant-value" id="hyperlocalNO2">45.6</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="neighborhood-map-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-map"></i>
+                        <h4>Neighborhood Air Quality Map</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="map-grid" id="neighborhoodMap">
+                            <!-- 5x5 grid will be generated by JavaScript -->
+                        </div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <div class="legend-color aqi-good"></div>
+                                <span>Good</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color aqi-moderate"></div>
+                                <span>Moderate</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color aqi-poor"></div>
+                                <span>Poor</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="safe-routes-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-route"></i>
+                        <h4>Safe Routes</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="route-input">
+                            <div class="route-field">
+                                <label>From:</label>
+                                <input type="text" id="routeFrom" placeholder="Starting point" value="Home">
+                            </div>
+                            <div class="route-field">
+                                <label>To:</label>
+                                <input type="text" id="routeTo" placeholder="Destination" value="Office">
+                            </div>
+                            <button class="btn-route" id="findRoutes">Find Safe Routes</button>
+                        </div>
+                        <div class="routes-list" id="routesList">
+                            <div class="route-option">
+                                <div class="route-info">
+                                    <div class="route-type metro">
+                                        <i class="fas fa-subway"></i>
+                                        <span>Metro Route</span>
+                                    </div>
+                                    <div class="route-stats">
+                                        <span class="route-duration">45 min</span>
+                                        <span class="route-aqi">180 AQI</span>
+                                        <span class="route-distance">12 km</span>
+                                    </div>
+                                </div>
+                                <div class="route-score excellent">Excellent</div>
+                            </div>
+                            <div class="route-option">
+                                <div class="route-info">
+                                    <div class="route-type cycling">
+                                        <i class="fas fa-bicycle"></i>
+                                        <span>Cycling Route</span>
+                                    </div>
+                                    <div class="route-stats">
+                                        <span class="route-duration">30 min</span>
+                                        <span class="route-aqi">200 AQI</span>
+                                        <span class="route-distance">8 km</span>
+                                    </div>
+                                </div>
+                                <div class="route-score good">Good</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="activity-recommendations-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-running"></i>
+                        <h4>Activity Recommendations</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-selector">
+                            <button class="activity-btn active" data-activity="walking">
+                                <i class="fas fa-walking"></i>
+                                <span>Walking</span>
+                            </button>
+                            <button class="activity-btn" data-activity="running">
+                                <i class="fas fa-running"></i>
+                                <span>Running</span>
+                            </button>
+                            <button class="activity-btn" data-activity="cycling">
+                                <i class="fas fa-bicycle"></i>
+                                <span>Cycling</span>
+                            </button>
+                        </div>
+                        <div class="activity-recommendation" id="activityRecommendation">
+                            <div class="recommendation-status good">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Safe for outdoor activities</span>
+                            </div>
+                            <div class="recommendation-details">
+                                <p>Current air quality is suitable for outdoor activities. Consider wearing a mask if you have respiratory sensitivities.</p>
+                                <div class="recommendation-tips">
+                                    <div class="tip-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Best time: 6-8 AM</span>
+                                    </div>
+                                    <div class="tip-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>Try parks and green areas</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Health Alerts Section -->
     <section class="alerts-section" id="alerts">
         <div class="section-header">
@@ -427,6 +615,474 @@
                             <li><i class="fas fa-check"></i> Stay hydrated</li>
                             <li><i class="fas fa-check"></i> Monitor breathing patterns</li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Satellite Tracking Section -->
+    <section class="satellite-section" id="satellite">
+        <div class="section-header">
+            <h2 class="section-title">Satellite Pollution Tracking</h2>
+            <p class="section-subtitle">Real-time monitoring of pollution sources using satellite data</p>
+        </div>
+        
+        <div class="satellite-container">
+            <div class="satellite-controls">
+                <div class="control-group">
+                    <button class="control-btn active" data-tracking="stubble-burning">
+                        <i class="fas fa-fire"></i>
+                        Stubble Burning
+                    </button>
+                    <button class="control-btn" data-tracking="industrial">
+                        <i class="fas fa-industry"></i>
+                        Industrial Hotspots
+                    </button>
+                    <button class="control-btn" data-tracking="aerosol">
+                        <i class="fas fa-cloud"></i>
+                        Aerosol Depth
+                    </button>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn" data-timeframe="24h">
+                        <i class="fas fa-clock"></i>
+                        Last 24 Hours
+                    </button>
+                    <button class="control-btn active" data-timeframe="3d">
+                        <i class="fas fa-calendar-day"></i>
+                        Last 3 Days
+                    </button>
+                    <button class="control-btn" data-timeframe="7d">
+                        <i class="fas fa-calendar-week"></i>
+                        Last Week
+                    </button>
+                </div>
+            </div>
+            
+            <div class="satellite-grid">
+                <div class="stubble-burning-card holographic-card active-tracking">
+                    <div class="card-header">
+                        <div class="header-icon fire-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="header-content">
+                            <h4>Stubble Burning Activity</h4>
+                            <span class="data-source">NASA MODIS & VIIRS</span>
+                        </div>
+                        <div class="header-status">
+                            <div class="status-indicator active"></div>
+                            <span>Live</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="satellite-metrics">
+                            <div class="metric-item">
+                                <div class="metric-label">Fire Detections</div>
+                                <div class="metric-value fire-count" id="fireCount">23</div>
+                                <div class="metric-trend trend-increasing">
+                                    <i class="fas fa-arrow-up"></i> +8 from yesterday
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Thermal Anomalies</div>
+                                <div class="metric-value" id="thermalAnomalies">15</div>
+                                <div class="metric-trend trend-stable">
+                                    <i class="fas fa-minus"></i> No change
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Smoke Plumes</div>
+                                <div class="metric-value" id="smokePlumes">8</div>
+                                <div class="metric-trend trend-increasing">
+                                    <i class="fas fa-arrow-up"></i> +3 detected
+                                </div>
+                            </div>
+                        </div>
+                        <div class="impact-prediction">
+                            <div class="impact-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Delhi-NCR Impact Prediction</span>
+                            </div>
+                            <div class="impact-details">
+                                <div class="impact-item">
+                                    <span class="impact-label">Expected AQI Increase:</span>
+                                    <span class="impact-value critical">+85 points</span>
+                                </div>
+                                <div class="impact-item">
+                                    <span class="impact-label">Time to Impact:</span>
+                                    <span class="impact-value">4-6 hours</span>
+                                </div>
+                                <div class="impact-item">
+                                    <span class="impact-label">Wind Direction:</span>
+                                    <span class="impact-value">Northwest</span>
+                                </div>
+                                <div class="impact-item">
+                                    <span class="impact-label">Confidence:</span>
+                                    <span class="impact-value">92%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="industrial-hotspots-card holographic-card">
+                    <div class="card-header">
+                        <div class="header-icon industrial-icon">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                        <div class="header-content">
+                            <h4>Industrial Emission Hotspots</h4>
+                            <span class="data-source">Landsat Thermal & MODIS</span>
+                        </div>
+                        <div class="header-status">
+                            <div class="status-indicator active"></div>
+                            <span>Monitoring</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="hotspots-list">
+                            <div class="hotspot-item">
+                                <div class="hotspot-info">
+                                    <div class="hotspot-name">Mayapuri Industrial Area</div>
+                                    <div class="hotspot-coordinates">28.6289°N, 77.2065°E</div>
+                                </div>
+                                <div class="hotspot-metrics">
+                                    <div class="hotspot-temperature">65°C</div>
+                                    <div class="hotspot-intensity high">High</div>
+                                </div>
+                            </div>
+                            <div class="hotspot-item">
+                                <div class="hotspot-info">
+                                    <div class="hotspot-name">Okhla Industrial Area</div>
+                                    <div class="hotspot-coordinates">28.5314°N, 77.2728°E</div>
+                                </div>
+                                <div class="hotspot-metrics">
+                                    <div class="hotspot-temperature">58°C</div>
+                                    <div class="hotspot-intensity medium">Medium</div>
+                                </div>
+                            </div>
+                            <div class="hotspot-item">
+                                <div class="hotspot-info">
+                                    <div class="hotspot-name">Narela Industrial Area</div>
+                                    <div class="hotspot-coordinates">28.8519°N, 77.0927°E</div>
+                                </div>
+                                <div class="hotspot-metrics">
+                                    <div class="hotspot-temperature">62°C</div>
+                                    <div class="hotspot-intensity high">High</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="emission-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Total Hotspots:</span>
+                                <span class="summary-value">8 detected</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Emission Intensity:</span>
+                                <span class="summary-value critical">High</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Last Updated:</span>
+                                <span class="summary-value">2 minutes ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="aerosol-depth-card holographic-card">
+                    <div class="card-header">
+                        <div class="header-icon aerosol-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="header-content">
+                            <h4>Aerosol Optical Depth</h4>
+                            <span class="data-source">MODIS Terra & Aqua</span>
+                        </div>
+                        <div class="header-status">
+                            <div class="status-indicator active"></div>
+                            <span>Updated</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="aod-map">
+                            <div class="aod-locations">
+                                <div class="aod-location">
+                                    <div class="location-name">Delhi</div>
+                                    <div class="aod-value">0.847</div>
+                                    <div class="aod-quality poor">Poor</div>
+                                </div>
+                                <div class="aod-location">
+                                    <div class="location-name">Gurgaon</div>
+                                    <div class="aod-value">0.623</div>
+                                    <div class="aod-quality moderate">Moderate</div>
+                                </div>
+                                <div class="aod-location">
+                                    <div class="location-name">Noida</div>
+                                    <div class="aod-value">0.912</div>
+                                    <div class="aod-quality poor">Poor</div>
+                                </div>
+                                <div class="aod-location">
+                                    <div class="location-name">Faridabad</div>
+                                    <div class="aod-value">0.734</div>
+                                    <div class="aod-quality moderate">Moderate</div>
+                                </div>
+                                <div class="aod-location">
+                                    <div class="location-name">Ghaziabad</div>
+                                    <div class="aod-value">0.789</div>
+                                    <div class="aod-quality poor">Poor</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="aod-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Average AOD:</span>
+                                <span class="summary-value">0.781</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Data Quality:</span>
+                                <span class="summary-value">High</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Satellite Pass:</span>
+                                <span class="summary-value">Terra (10:30 AM)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Policy Effectiveness Dashboard Section -->
+    <section class="policy-dashboard-section" id="policy-dashboard">
+        <div class="section-header">
+            <h2 class="section-title">Policy Effectiveness Dashboard</h2>
+            <p class="section-subtitle">Real-time tracking of policy interventions and their impact</p>
+        </div>
+        
+        <div class="policy-dashboard-container">
+            <div class="policy-controls">
+                <div class="control-group">
+                    <button class="policy-btn active" data-policy="odd-even">
+                        <i class="fas fa-car-side"></i>
+                        Odd-Even Policy
+                    </button>
+                    <button class="policy-btn" data-policy="construction-ban">
+                        <i class="fas fa-hammer"></i>
+                        Construction Ban
+                    </button>
+                    <button class="policy-btn" data-policy="industrial-shutdown">
+                        <i class="fas fa-industry"></i>
+                        Industrial Shutdown
+                    </button>
+                    <button class="policy-btn" data-policy="public-transport">
+                        <i class="fas fa-bus"></i>
+                        Public Transport
+                    </button>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn primary" id="startPolicy">
+                        <i class="fas fa-play"></i>
+                        Start Intervention
+                    </button>
+                    <button class="action-btn secondary" id="predictPolicy">
+                        <i class="fas fa-crystal-ball"></i>
+                        Predict Effectiveness
+                    </button>
+                </div>
+            </div>
+            
+            <div class="policy-grid">
+                <div class="active-interventions-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>Active Interventions</h4>
+                        <div class="header-badge">
+                            <span class="badge-count" id="activeCount">2</span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="intervention-list">
+                            <div class="intervention-item">
+                                <div class="intervention-info">
+                                    <div class="intervention-name">Odd-Even Vehicle Policy</div>
+                                    <div class="intervention-status active">
+                                        <div class="status-dot"></div>
+                                        <span>Active</span>
+                                    </div>
+                                </div>
+                                <div class="intervention-metrics">
+                                    <div class="metric">
+                                        <span class="metric-label">Duration:</span>
+                                        <span class="metric-value">2h 15m</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">AQI Reduction:</span>
+                                        <span class="metric-value success">-23 points</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Effectiveness:</span>
+                                        <span class="metric-value">87%</span>
+                                    </div>
+                                </div>
+                                <div class="intervention-actions">
+                                    <button class="btn-small primary">Monitor</button>
+                                    <button class="btn-small secondary">End</button>
+                                </div>
+                            </div>
+                            <div class="intervention-item">
+                                <div class="intervention-info">
+                                    <div class="intervention-name">Construction Ban</div>
+                                    <div class="intervention-status active">
+                                        <div class="status-dot"></div>
+                                        <span>Active</span>
+                                    </div>
+                                </div>
+                                <div class="intervention-metrics">
+                                    <div class="metric">
+                                        <span class="metric-label">Duration:</span>
+                                        <span class="metric-value">6h 30m</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">AQI Reduction:</span>
+                                        <span class="metric-value success">-31 points</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Effectiveness:</span>
+                                        <span class="metric-value">92%</span>
+                                    </div>
+                                </div>
+                                <div class="intervention-actions">
+                                    <button class="btn-small primary">Monitor</button>
+                                    <button class="btn-small secondary">End</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="ai-recommendations-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-robot"></i>
+                        <h4>AI Policy Recommendations</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="recommendation-item high-priority">
+                            <div class="recommendation-header">
+                                <div class="priority-badge high">High Priority</div>
+                                <div class="recommendation-confidence">Confidence: 94%</div>
+                            </div>
+                            <div class="recommendation-content">
+                                <h5>Implement Industrial Shutdown</h5>
+                                <p>Current conditions indicate high effectiveness for industrial shutdown intervention. Expected 35-point AQI reduction within 2 hours.</p>
+                                <div class="recommendation-details">
+                                    <div class="detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Optimal timing: Next 2 hours</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Expected reduction: 35 AQI points</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span>Cost category: High</span>
+                                    </div>
+                                </div>
+                                <button class="btn-recommendation">Implement Now</button>
+                            </div>
+                        </div>
+                        <div class="recommendation-item medium-priority">
+                            <div class="recommendation-header">
+                                <div class="priority-badge medium">Medium Priority</div>
+                                <div class="recommendation-confidence">Confidence: 78%</div>
+                            </div>
+                            <div class="recommendation-content">
+                                <h5>Enhance Public Transport</h5>
+                                <p>Increase metro and bus frequency to reduce vehicular emissions. Best implemented during evening rush hours.</p>
+                                <div class="recommendation-details">
+                                    <div class="detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Optimal timing: 5-7 PM</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Expected reduction: 12 AQI points</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span>Cost category: Medium</span>
+                                    </div>
+                                </div>
+                                <button class="btn-recommendation">Schedule</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="intervention-timing-card holographic-card">
+                    <div class="card-header">
+                        <i class="fas fa-clock"></i>
+                        <h4>Optimal Intervention Timing</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="timing-analysis">
+                            <div class="current-conditions">
+                                <h5>Current Conditions</h5>
+                                <div class="condition-item">
+                                    <span class="condition-label">AQI Level:</span>
+                                    <span class="condition-value critical">287 (Poor)</span>
+                                </div>
+                                <div class="condition-item">
+                                    <span class="condition-label">Wind Speed:</span>
+                                    <span class="condition-value">8 km/h</span>
+                                </div>
+                                <div class="condition-item">
+                                    <span class="condition-label">Temperature:</span>
+                                    <span class="condition-value">28°C</span>
+                                </div>
+                                <div class="condition-item">
+                                    <span class="condition-label">Time of Day:</span>
+                                    <span class="condition-value">2:30 PM</span>
+                                </div>
+                            </div>
+                            <div class="timing-recommendations">
+                                <h5>Optimal Timing Windows</h5>
+                                <div class="timing-window immediate">
+                                    <div class="window-header">
+                                        <i class="fas fa-bolt"></i>
+                                        <span>Immediate (Next 2 hours)</span>
+                                    </div>
+                                    <div class="window-details">
+                                        <p>Perfect conditions for industrial shutdown. Wind patterns favor immediate intervention.</p>
+                                        <div class="effectiveness-score">95%</div>
+                                    </div>
+                                </div>
+                                <div class="timing-window evening">
+                                    <div class="window-header">
+                                        <i class="fas fa-sunset"></i>
+                                        <span>Evening Rush (5-7 PM)</span>
+                                    </div>
+                                    <div class="window-details">
+                                        <p>Optimal for traffic management policies. High vehicle density ensures maximum impact.</p>
+                                        <div class="effectiveness-score">88%</div>
+                                    </div>
+                                </div>
+                                <div class="timing-window morning">
+                                    <div class="window-header">
+                                        <i class="fas fa-sunrise"></i>
+                                        <span>Morning Rush (7-9 AM)</span>
+                                    </div>
+                                    <div class="window-details">
+                                        <p>Good for construction bans. Temperature inversion conditions enhance effectiveness.</p>
+                                        <div class="effectiveness-score">82%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -565,14 +1221,24 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Force dark mode on page load -->
+    <script>
+        // Ensure dark mode is applied immediately on page load
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('airwatch-theme', 'dark');
+    </script>
+    
+    <!-- Scripts - Load in optimized order -->
     <script src="js/modern-ui.js"></script>
+    <script src="js/simple-navigation.js"></script>
+    <script src="js/theme-toggle.js" defer></script>
+    <script src="js/notifications.js" defer></script>
     <script src="js/hero-animations.js" defer></script>
     <script src="js/pollution-map.js" defer></script>
     <script src="js/forecast-chart.js" defer></script>
-    <script src="js/notifications.js" defer></script>
-    <script src="js/theme-toggle.js" defer></script>
-    <script src="js/simple-navigation.js" defer></script>
     <script src="js/realtime-data.js" defer></script>
+    <script src="js/new-sections.js" defer></script>
+    <script src="js/enhanced-forecast.js" defer></script>
 </body>
 </html>

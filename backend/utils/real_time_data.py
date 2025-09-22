@@ -317,3 +317,5 @@ if __name__ == "__main__":
     stats = fetcher.get_api_usage_stats()
     for api, stat in stats.items():
         print(f"{api}: {stat['calls_made']}/{stat['free_limit']} calls ({stat['usage_percentage']:.1f}%)")
+
+

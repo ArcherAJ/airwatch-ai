@@ -2,7 +2,7 @@
 
 class ModernUI {
     constructor() {
-        this.isDarkMode = true;
+        this.isDarkMode = true; // Default to dark mode
         this.notifications = [];
         this.currentSection = 'home';
         this.init();
@@ -22,22 +22,14 @@ class ModernUI {
         const navToggle = document.getElementById('navToggle');
         const navMenu = document.getElementById('navMenu');
 
-        // Smooth scrolling for navigation links
+        // Smooth scrolling for navigation links - FIXED: Only scroll to sections, don't redirect
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const targetId = link.getAttribute('href').substring(1);
                 
-                if (targetId === 'dashboard') {
-                    this.navigateToPage('/source_analysis.html');
-                } else if (targetId === 'forecast') {
-                    this.navigateToPage('/forecasting.html');
-                } else if (targetId === 'community') {
-                    this.navigateToPage('/citizen_portal.html');
-                } else {
-                    this.scrollToSection(targetId);
-                }
-                
+                // Always scroll to section instead of redirecting to different pages
+                this.scrollToSection(targetId);
                 this.updateActiveNavLink(link);
             });
         });
@@ -103,12 +95,14 @@ class ModernUI {
             this.toggleTheme();
         });
 
-        // Load saved theme
+        // Load saved theme - default to dark mode
         const savedTheme = localStorage.getItem('airwatch-theme');
         if (savedTheme) {
             this.isDarkMode = savedTheme === 'dark';
-            this.applyTheme();
+        } else {
+            this.isDarkMode = true; // Default to dark mode if no saved theme
         }
+        this.applyTheme();
     }
 
     toggleTheme() {

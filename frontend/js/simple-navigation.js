@@ -19,6 +19,9 @@ function scrollToSection(sectionId) {
         // Add to navigation history
         navigationHistory.push(sectionId);
         
+        // Show back button if not on home section
+        updateBackButtonVisibility(sectionId);
+        
         console.log(`Scrolled to section: ${sectionId}`);
     } else {
         console.warn(`Section with id '${sectionId}' not found`);
@@ -57,8 +60,10 @@ function navigateToPage(page) {
 
 // Go back to previous page/section
 function goBack() {
-    if (navigationHistory.length > 0) {
-        const previousPage = navigationHistory.pop();
+    if (navigationHistory.length > 1) {
+        // Remove current section from history
+        navigationHistory.pop();
+        const previousPage = navigationHistory[navigationHistory.length - 1];
         console.log(`Going back to: ${previousPage}`);
         
         if (previousPage.includes('#')) {
@@ -69,9 +74,14 @@ function goBack() {
             // It's a page, navigate to it
             navigateToPage(previousPage);
         }
+        
+        // Update back button visibility
+        updateBackButtonVisibility(previousPage);
     } else {
         // No history, go to home
-        window.location.href = 'index.html';
+        scrollToSection('home');
+        navigationHistory = ['home'];
+        updateBackButtonVisibility('home');
     }
 }
 
@@ -232,17 +242,19 @@ function setupEventListeners() {
 
 // Handle click events
 function handleClick(e) {
-    // Handle navigation links
+    // Handle navigation links - FIXED: Let modern-ui.js handle section navigation
     if (e.target.closest('.nav-link')) {
         const navLink = e.target.closest('.nav-link');
         const href = navLink.getAttribute('href');
         
-        if (href && href !== '#') {
+        // Only handle page navigation for external links, let modern-ui.js handle section scrolling
+        if (href && href.includes('.html') && !href.startsWith('#')) {
             e.preventDefault();
             const page = href.replace('.html', '');
             console.log(`Navigating to page: ${page}`);
             navigateToPage(page);
         }
+        // For hash links (#section), let modern-ui.js handle them
     }
     
     // Handle dashboard buttons
@@ -278,7 +290,7 @@ function handleClick(e) {
     }
     
     // Handle back button
-    if (e.target.closest('.btn-back')) {
+    if (e.target.closest('.btn-back') || e.target.closest('#backButton')) {
         e.preventDefault();
         console.log('Back button clicked');
         goBack();
@@ -367,6 +379,18 @@ function debugNavigation() {
     console.log('Event listeners attached:', document.hasAttribute('data-navigation-initialized'));
     console.log('Back button found:', document.querySelector('.btn-back') ? 'Yes' : 'No');
     console.log('================================');
+}
+
+// Update back button visibility
+function updateBackButtonVisibility(currentSection) {
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        if (currentSection === 'home' || navigationHistory.length <= 1) {
+            backButton.style.display = 'none';
+        } else {
+            backButton.style.display = 'flex';
+        }
+    }
 }
 
 // Make debug function globally available

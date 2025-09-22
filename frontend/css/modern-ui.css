@@ -45,6 +45,12 @@ body {
     overflow-x: hidden;
 }
 
+/* Ensure dark mode by default */
+body:not([data-theme="light"]) {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
 /* Gradient Text Effect */
 .gradient-text {
     background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4, #10b981);
@@ -205,6 +211,25 @@ body {
 }
 
 .btn-theme-toggle:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-back {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.btn-back:hover {
     background: rgba(59, 130, 246, 0.2);
     transform: translateY(-2px);
 }
