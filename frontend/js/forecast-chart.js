@@ -1,4 +1,4 @@
-// Forecast Chart for AirWatch AI
+// Enhanced Forecast Chart for AirWatch AI
 
 class ForecastChart {
     constructor() {
@@ -7,6 +7,15 @@ class ForecastChart {
         this.data = [];
         this.currentPeriod = '24h';
         this.theme = 'dark';
+        this.animationId = null;
+        this.hoveredPoint = null;
+        this.isAnimating = false;
+        this.animationProgress = 0;
+        this.forecastData = {
+            '24h': null,
+            '48h': null,
+            '72h': null
+        };
         this.init();
     }
 
@@ -38,66 +47,280 @@ class ForecastChart {
 
     async loadData() {
         try {
-            const response = await fetch('/api/advanced/predictive/modeling');
-            const data = await response.json();
-            this.data = this.processForecastData(data);
+            // Load data for all periods
+            const responses = await Promise.all([
+                fetch('/api/forecasting/advanced-forecast'),
+                fetch('/api/forecasting/ai-forecast'),
+                fetch('/api/forecasting/seasonal-forecast')
+            ]);
+            
+            const [advancedData, aiData, seasonalData] = await Promise.all(
+                responses.map(r => r.json())
+            );
+            
+            this.processAllForecastData(advancedData, aiData, seasonalData);
         } catch (error) {
             console.log('Using mock forecast data');
-            this.data = this.generateMockData();
+            this.generateAllMockData();
         }
     }
 
-    processForecastData(apiData) {
-        // Process API data into chart format
-        const scenarios = apiData.scenarios;
-        const currentScenario = scenarios[0]; // Current Policy Continuation
+    processAllForecastData(advancedData, aiData, seasonalData) {
+        // Process 24-hour forecast
+        this.forecastData['24h'] = this.process24HourData(advancedData);
+        
+        // Process 48-hour forecast
+        this.forecastData['48h'] = this.process48HourData(aiData);
+        
+        // Process 72-hour forecast
+        this.forecastData['72h'] = this.process72HourData(seasonalData);
+        
+        this.data = this.forecastData[this.currentPeriod];
+    }
+
+    process24HourData(data) {
+        const predictions = data.forecasts['24_hour'].predictions || [];
+        const labels = [];
+        const aqiData = [];
+        const pm25Data = [];
+        const pm10Data = [];
+        const confidenceData = [];
+        
+        predictions.forEach((pred, index) => {
+            const date = new Date(pred.timestamp);
+            const hour = date.getHours();
+            labels.push(`${hour}:00`);
+            aqiData.push(pred.aqi);
+            pm25Data.push(pred.pm25 || pred.aqi * 0.4);
+            pm10Data.push(pred.pm10 || pred.aqi * 0.6);
+            confidenceData.push(pred.confidence || 85);
+        });
         
         return {
-            labels: ['6AM', '9AM', '12PM', '3PM', '6PM', '9PM', '12AM', '3AM'],
+            labels: labels,
             datasets: [
                 {
-                    label: 'Current Policy',
-                    data: [295, 312, 298, 285, 278, 265, 270, 275],
-                    borderColor: this.theme === 'dark' ? '#60a5fa' : '#3b82f6',
-                    backgroundColor: this.theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                    label: 'AQI Forecast',
+                    data: aqiData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    type: 'line'
                 },
                 {
-                    label: 'Enhanced Odd-Even',
-                    data: [267, 284, 271, 258, 251, 238, 243, 248],
-                    borderColor: this.theme === 'dark' ? '#34d399' : '#10b981',
-                    backgroundColor: this.theme === 'dark' ? 'rgba(52, 211, 153, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                    label: 'PM2.5',
+                    data: pm25Data,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4,
                     fill: false,
-                    borderDash: [5, 5]
+                    type: 'line'
+                },
+                {
+                    label: 'PM10',
+                    data: pm10Data,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: false,
+                    type: 'line'
                 }
-            ]
+            ],
+            confidence: confidenceData,
+            period: '24h'
         };
     }
 
-    generateMockData() {
+    process48HourData(data) {
+        const predictions = data.forecasts['48_hour']?.predictions || [];
+        const labels = [];
+        const aqiData = [];
+        const pm25Data = [];
+        const pm10Data = [];
+        const confidenceData = [];
+        
+        // Generate 48-hour data if not available
+        for (let i = 0; i < 48; i++) {
+            const hour = i % 24;
+            const day = Math.floor(i / 24);
+            labels.push(`${day === 0 ? 'Today' : 'Tomorrow'} ${hour}:00`);
+            
+            // Simulate realistic 48-hour patterns
+            const baseAqi = 250 + Math.sin(i * 0.1) * 50 + Math.random() * 30;
+            aqiData.push(Math.max(100, Math.min(400, baseAqi)));
+            pm25Data.push(Math.max(50, Math.min(200, baseAqi * 0.4)));
+            pm10Data.push(Math.max(80, Math.min(300, baseAqi * 0.6)));
+            confidenceData.push(Math.max(70, 95 - i * 0.5));
+        }
+        
         return {
-            labels: ['6AM', '9AM', '12PM', '3PM', '6PM', '9PM', '12AM', '3AM'],
+            labels: labels,
             datasets: [
                 {
-                    label: 'Current Policy',
-                    data: [295, 312, 298, 285, 278, 265, 270, 275],
-                    borderColor: this.theme === 'dark' ? '#60a5fa' : '#3b82f6',
-                    backgroundColor: this.theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                    label: 'AQI Forecast',
+                    data: aqiData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    type: 'line'
                 },
                 {
-                    label: 'Enhanced Odd-Even',
-                    data: [267, 284, 271, 258, 251, 238, 243, 248],
-                    borderColor: this.theme === 'dark' ? '#34d399' : '#10b981',
-                    backgroundColor: this.theme === 'dark' ? 'rgba(52, 211, 153, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                    label: 'PM2.5',
+                    data: pm25Data,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4,
                     fill: false,
-                    borderDash: [5, 5]
+                    type: 'line'
+                },
+                {
+                    label: 'PM10',
+                    data: pm10Data,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: false,
+                    type: 'line'
                 }
-            ]
+            ],
+            confidence: confidenceData,
+            period: '48h'
+        };
+    }
+
+    process72HourData(data) {
+        const predictions = data.forecasts['72_hour']?.predictions || [];
+        const labels = [];
+        const aqiData = [];
+        const pm25Data = [];
+        const pm10Data = [];
+        const confidenceData = [];
+        
+        // Generate 72-hour data with daily patterns
+        for (let i = 0; i < 72; i++) {
+            const hour = i % 24;
+            const day = Math.floor(i / 24);
+            const dayNames = ['Today', 'Tomorrow', 'Day 3'];
+            labels.push(`${dayNames[day]} ${hour}:00`);
+            
+            // Simulate realistic 72-hour patterns with daily cycles
+            const dailyCycle = Math.sin((hour - 6) * Math.PI / 12) * 30;
+            const weeklyTrend = Math.sin(i * 0.05) * 20;
+            const baseAqi = 250 + dailyCycle + weeklyTrend + Math.random() * 25;
+            
+            aqiData.push(Math.max(100, Math.min(400, baseAqi)));
+            pm25Data.push(Math.max(50, Math.min(200, baseAqi * 0.4)));
+            pm10Data.push(Math.max(80, Math.min(300, baseAqi * 0.6)));
+            confidenceData.push(Math.max(60, 95 - i * 0.4));
+        }
+        
+        return {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'AQI Forecast',
+                    data: aqiData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    type: 'line'
+                },
+                {
+                    label: 'PM2.5',
+                    data: pm25Data,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: false,
+                    type: 'line'
+                },
+                {
+                    label: 'PM10',
+                    data: pm10Data,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: false,
+                    type: 'line'
+                }
+            ],
+            confidence: confidenceData,
+            period: '72h'
+        };
+    }
+
+    generateAllMockData() {
+        this.forecastData['24h'] = this.generateMockData('24h');
+        this.forecastData['48h'] = this.generateMockData('48h');
+        this.forecastData['72h'] = this.generateMockData('72h');
+        this.data = this.forecastData[this.currentPeriod];
+    }
+
+    generateMockData(period) {
+        const hours = period === '24h' ? 24 : period === '48h' ? 48 : 72;
+        const labels = [];
+        const aqiData = [];
+        const pm25Data = [];
+        const pm10Data = [];
+        const confidenceData = [];
+        
+        for (let i = 0; i < hours; i++) {
+            const hour = i % 24;
+            const day = Math.floor(i / 24);
+            
+            if (period === '24h') {
+                labels.push(`${hour}:00`);
+            } else if (period === '48h') {
+                labels.push(`${day === 0 ? 'Today' : 'Tomorrow'} ${hour}:00`);
+            } else {
+                const dayNames = ['Today', 'Tomorrow', 'Day 3'];
+                labels.push(`${dayNames[day]} ${hour}:00`);
+            }
+            
+            // Generate realistic patterns
+            const baseAqi = 250 + Math.sin(i * 0.1) * 50 + Math.random() * 30;
+            aqiData.push(Math.max(100, Math.min(400, baseAqi)));
+            pm25Data.push(Math.max(50, Math.min(200, baseAqi * 0.4)));
+            pm10Data.push(Math.max(80, Math.min(300, baseAqi * 0.6)));
+            confidenceData.push(Math.max(60, 95 - i * 0.4));
+        }
+        
+        return {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'AQI Forecast',
+                    data: aqiData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    type: 'line'
+                },
+                {
+                    label: 'PM2.5',
+                    data: pm25Data,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: false,
+                    type: 'line'
+                },
+                {
+                    label: 'PM10',
+                    data: pm10Data,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: false,
+                    type: 'line'
+                }
+            ],
+            confidence: confidenceData,
+            period: period
         };
     }
 
@@ -193,6 +416,9 @@ class ForecastChart {
         this.data.datasets.forEach(dataset => {
             this.drawDataset(dataset);
         });
+        
+        // Draw confidence indicators
+        this.drawConfidenceIndicators();
     }
 
     drawDataset(dataset) {
@@ -266,6 +492,32 @@ class ForecastChart {
         });
         
         this.ctx.restore();
+    }
+
+    drawConfidenceIndicators() {
+        if (!this.data.confidence) return;
+        
+        const labelCount = this.data.confidence.length;
+        
+        this.data.confidence.forEach((confidence, index) => {
+            const x = (this.canvas.width / (labelCount - 1)) * index;
+            const y = 20; // Top of chart
+            
+            // Draw confidence bar
+            const barWidth = 4;
+            const barHeight = 20;
+            const confidenceHeight = (confidence / 100) * barHeight;
+            
+            // Background bar
+            this.ctx.fillStyle = 'rgba(148, 163, 184, 0.2)';
+            this.ctx.fillRect(x - barWidth/2, y, barWidth, barHeight);
+            
+            // Confidence bar
+            const confidenceColor = confidence > 80 ? '#10b981' : 
+                                   confidence > 60 ? '#f59e0b' : '#ef4444';
+            this.ctx.fillStyle = confidenceColor;
+            this.ctx.fillRect(x - barWidth/2, y + barHeight - confidenceHeight, barWidth, confidenceHeight);
+        });
     }
 
     drawAxes() {
@@ -352,11 +604,30 @@ class ForecastChart {
         // Remove existing tooltip
         this.hideTooltip();
         
+        const confidence = this.data.confidence ? this.data.confidence[point.index] : 85;
+        const aqiCategory = this.getAQICategory(point.value);
+        
         const tooltip = document.createElement('div');
-        tooltip.className = 'chart-tooltip';
+        tooltip.className = 'chart-tooltip enhanced';
         tooltip.innerHTML = `
-            <div class="tooltip-title">${point.label}</div>
-            <div class="tooltip-value">${point.dataset.label}: ${point.value}</div>
+            <div class="tooltip-header">
+                <div class="tooltip-title">${point.label}</div>
+                <div class="tooltip-period">${this.currentPeriod.toUpperCase()} Forecast</div>
+            </div>
+            <div class="tooltip-content">
+                <div class="tooltip-metric">
+                    <span class="metric-label">${point.dataset.label}:</span>
+                    <span class="metric-value" style="color: ${point.dataset.borderColor}">${Math.round(point.value)}</span>
+                </div>
+                <div class="tooltip-metric">
+                    <span class="metric-label">Category:</span>
+                    <span class="metric-value">${aqiCategory}</span>
+                </div>
+                <div class="tooltip-metric">
+                    <span class="metric-label">Confidence:</span>
+                    <span class="metric-value" style="color: ${confidence > 80 ? '#10b981' : confidence > 60 ? '#f59e0b' : '#ef4444'}">${Math.round(confidence)}%</span>
+                </div>
+            </div>
         `;
         
         document.body.appendChild(tooltip);
@@ -367,6 +638,15 @@ class ForecastChart {
         tooltip.style.top = (rect.top + mouseY - 10) + 'px';
     }
 
+    getAQICategory(aqi) {
+        if (aqi <= 50) return 'Good';
+        if (aqi <= 100) return 'Satisfactory';
+        if (aqi <= 200) return 'Moderate';
+        if (aqi <= 300) return 'Poor';
+        if (aqi <= 400) return 'Very Poor';
+        return 'Severe';
+    }
+
     hideTooltip() {
         const existingTooltip = document.querySelector('.chart-tooltip');
         if (existingTooltip) {
@@ -375,8 +655,46 @@ class ForecastChart {
     }
 
     updateChart() {
-        // Update chart based on selected period
-        this.loadData();
+        // Switch to new period data
+        this.data = this.forecastData[this.currentPeriod];
+        
+        // Start transition animation
+        this.startTransitionAnimation();
+        
+        // Update period indicator
+        this.updatePeriodIndicator();
+    }
+
+    startTransitionAnimation() {
+        this.isAnimating = true;
+        this.animationProgress = 0;
+        
+        const animate = () => {
+            this.animationProgress += 0.05;
+            
+            if (this.animationProgress >= 1) {
+                this.animationProgress = 1;
+                this.isAnimating = false;
+            }
+            
+            if (this.isAnimating) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        animate();
+    }
+
+    updatePeriodIndicator() {
+        const indicator = document.querySelector('.period-indicator');
+        if (indicator) {
+            const periodNames = {
+                '24h': '24 Hours',
+                '48h': '48 Hours', 
+                '72h': '72 Hours'
+            };
+            indicator.textContent = periodNames[this.currentPeriod];
+        }
     }
 
     updateTheme(theme) {
@@ -390,30 +708,112 @@ document.addEventListener('DOMContentLoaded', () => {
     window.forecastChart = new ForecastChart();
 });
 
-// Add chart tooltip styles
+// Add enhanced chart tooltip styles
 const chartStyles = `
 <style>
 .chart-tooltip {
     position: absolute;
-    background: var(--bg-overlay);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 8px 12px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    padding: 16px;
     font-size: 12px;
-    color: var(--text-primary);
-    box-shadow: 0 10px 25px var(--shadow-color);
-    backdrop-filter: blur(10px);
+    color: #ffffff;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
     z-index: 1000;
     pointer-events: none;
+    min-width: 200px;
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.chart-tooltip.enhanced {
+    min-width: 250px;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.tooltip-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tooltip-title {
     font-weight: 600;
+    font-size: 14px;
+    color: #ffffff;
     margin-bottom: 4px;
 }
 
-.tooltip-value {
-    color: var(--text-secondary);
+.tooltip-period {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tooltip-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-label {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.metric-value {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Period Indicator */
+.period-indicator {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3b82f6;
+    margin-left: 8px;
+}
+
+/* Timeline Controls */
+.btn-timeline {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.btn-timeline:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-timeline.active {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 </style>
 `;

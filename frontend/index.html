@@ -255,11 +255,17 @@
         <div class="forecast-container">
             <div class="forecast-timeline">
                 <div class="timeline-header">
-                    <h3>Hourly Forecast</h3>
+                    <h3>Hourly Forecast <span class="period-indicator">24 Hours</span></h3>
                     <div class="timeline-controls">
-                        <button class="btn-timeline active" data-period="24h">24H</button>
-                        <button class="btn-timeline" data-period="48h">48H</button>
-                        <button class="btn-timeline" data-period="72h">72H</button>
+                        <button class="btn-timeline active" data-period="24h">
+                            <i class="fas fa-clock"></i> 24H
+                        </button>
+                        <button class="btn-timeline" data-period="48h">
+                            <i class="fas fa-calendar-day"></i> 48H
+                        </button>
+                        <button class="btn-timeline" data-period="72h">
+                            <i class="fas fa-calendar-week"></i> 72H
+                        </button>
                     </div>
                 </div>
                 <div class="timeline-chart">
