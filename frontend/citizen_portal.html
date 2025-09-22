@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/modern-ui.css">
-    <link rel="stylesheet" href="css/theme-system.css">
+        <link rel="stylesheet" href="css/dashboard-navigation.css">
     <link rel="stylesheet" href="css/charts.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
@@ -17,47 +17,60 @@
 <body>
     <div class="app-container">
         <!-- Navigation -->
-        <nav class="main-nav">
-            <div class="nav-brand">
-                <img src="assets/icons/airwatch-logo.png" alt="AirWatch AI Logo">
-                <span>AirWatch AI</span>
-            </div>
-            <ul class="nav-links">
-                <li><a href="index.html"><i class="fas fa-home"></i> Overview</a></li>
-                <li><a href="source_analysis.html"><i class="fas fa-chart-pie"></i> Source Analysis</a></li>
-                <li><a href="forecasting.html"><i class="fas fa-cloud-sun"></i> Forecasting</a></li>
-                <li><a href="citizen_portal.html" class="active"><i class="fas fa-users"></i> Community</a></li>
-                <li><a href="policy_dashboard.html"><i class="fas fa-chart-line"></i> Policy Dashboard</a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="btn-notification" id="notificationBtn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">5</span>
-                </button>
-                <div class="theme-toggle-container">
-                    <button class="btn-theme-toggle" id="themeToggle">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <div class="theme-menu" id="themeMenu">
-                        <div class="theme-option active" data-theme="dark">
-                            <i class="fas fa-moon"></i>
-                            <span>Dark</span>
-                        </div>
-                        <div class="theme-option" data-theme="light">
-                            <i class="fas fa-sun"></i>
-                            <span>Light</span>
-                        </div>
-                        <div class="theme-option" data-theme="auto">
-                            <i class="fas fa-adjust"></i>
-                            <span>Auto</span>
-                        </div>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h2>AirWatch AI</h2>
+                        <span>Delhi-NCR Monitor</span>
                     </div>
                 </div>
-                <button class="nav-toggle" id="navToggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
+                
+                <div class="nav-menu" id="navMenu">
+                    <a href="index.html" class="nav-link">Overview</a>
+                    <a href="source_analysis.html" class="nav-link">Source Analysis</a>
+                    <a href="forecasting.html" class="nav-link">AI Forecasting</a>
+                    <a href="citizen_portal.html" class="nav-link active">Community</a>
+                    <a href="policy_dashboard.html" class="nav-link">Policy Dashboard</a>
+                </div>
+                
+                <div class="nav-actions">
+                    <button class="btn-back" onclick="goBack()" title="Go Back">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back</span>
+                    </button>
+                    <button class="btn-notification" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="theme-toggle-container">
+                        <button class="btn-theme-toggle" id="themeToggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <div class="theme-menu" id="themeMenu">
+                            <div class="theme-option active" data-theme="dark">
+                                <i class="fas fa-moon"></i>
+                                <span>Dark</span>
+                            </div>
+                            <div class="theme-option" data-theme="light">
+                                <i class="fas fa-sun"></i>
+                                <span>Light</span>
+                            </div>
+                            <div class="theme-option" data-theme="auto">
+                                <i class="fas fa-adjust"></i>
+                                <span>Auto</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="nav-toggle" id="navToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
             </div>
         </nav>
 
@@ -530,6 +543,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/simple-navigation.js"></script>
     <script src="js/modern-ui.js" defer></script>
     <script src="js/theme-toggle.js" defer></script>
     <script src="js/api.js" defer></script>

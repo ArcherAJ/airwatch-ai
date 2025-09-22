@@ -13,41 +13,58 @@ class ForecastingDashboard {
     }
 
     async initWithFallback() {
-        // Show loading state
+        // Show loading state immediately
         this.showLoadingState();
         
-        // Setup basic UI first
+        // Initialize gauges first (fastest to render)
+        this.initializeGauges();
+        
+        // Setup basic UI
         this.setupEventListeners();
         this.setupBasicAnimations();
         
-        // Load data in background
+        // Load data in background with shorter timeout
         try {
-            await this.loadForecastData();
+            await Promise.race([
+                this.loadForecastData(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+            ]);
         } catch (error) {
-            console.warn('Using fallback data:', error);
+            console.warn('Using fallback data for faster loading:', error);
             this.loadFallbackData();
         }
         
         // Initialize charts after data is ready
         this.initializeCharts();
-        this.initializeGauges();
         this.startRealTimeUpdates();
         this.isInitialized = true;
     }
 
     showLoadingState() {
-        // Add loading indicators to key elements
+        // Add loading skeletons to key elements
         const elements = [
-            '.chart-container',
-            '.ai-insights .insights-content',
-            '.seasonal-content',
-            '.alerts-list'
+            { selector: '.chart-container', skeleton: 'chart' },
+            { selector: '.insights-content', skeleton: 'insight' },
+            { selector: '.seasonal-content', skeleton: 'chart' },
+            { selector: '.alerts-list', skeleton: 'alert' }
         ];
         
-        elements.forEach(selector => {
+        elements.forEach(({ selector, skeleton }) => {
             const element = document.querySelector(selector);
             if (element) {
-                element.innerHTML = '<div class="loading-skeleton"></div>';
+                element.innerHTML = `<div class="loading-skeleton ${skeleton}"></div>`;
+            }
+        });
+        
+        // Add gauge skeletons
+        const gaugeIds = ['accuracyGauge', 'confidenceGauge', 'uptimeGauge'];
+        gaugeIds.forEach(id => {
+            const canvas = document.getElementById(id);
+            if (canvas) {
+                const container = canvas.parentElement;
+                if (container) {
+                    container.innerHTML = '<div class="loading-skeleton gauge"></div>';
+                }
             }
         });
     }
@@ -112,9 +129,9 @@ class ForecastingDashboard {
 
     async loadForecastData() {
         try {
-            // Set timeout for API call
+            // Set shorter timeout for faster loading
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            const timeoutId = setTimeout(() => controller.abort(), 2000); // Reduced to 2 seconds
             
             const response = await fetch('/api/forecasting/advanced-forecast', {
                 signal: controller.signal,
@@ -355,31 +372,38 @@ class ForecastingDashboard {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return null;
 
+        // Set canvas size immediately for proper alignment
+        const size = 120;
+        canvas.width = size;
+        canvas.height = size;
+        
         const ctx = canvas.getContext('2d');
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const radius = Math.min(centerX, centerY) - 10;
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const radius = (size / 2) - 15; // Leave margin for stroke
 
         // Draw background arc
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI);
-        ctx.lineWidth = 20;
+        ctx.lineWidth = 12;
         ctx.strokeStyle = '#e5e7eb';
         ctx.stroke();
 
-        // Draw value arc
+        // Draw value arc with animation
         const angle = (value / 100) * Math.PI;
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + angle);
-        ctx.lineWidth = 20;
+        ctx.lineWidth = 12;
         ctx.strokeStyle = color;
+        ctx.lineCap = 'round';
         ctx.stroke();
 
         // Draw value text
         ctx.fillStyle = color;
-        ctx.font = 'bold 24px Inter';
+        ctx.font = 'bold 20px Inter';
         ctx.textAlign = 'center';
-        ctx.fillText(`${value}%`, centerX, centerY + 8);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${value}%`, centerX, centerY + 5);
 
         return { canvas, ctx, centerX, centerY, radius };
     }

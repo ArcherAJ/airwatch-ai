@@ -9,11 +9,22 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/holographic.css">
     <link rel="stylesheet" href="css/modern-ui.css">
-    <link rel="stylesheet" href="css/theme-system.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="css/dashboard-navigation.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
 </head>
 <body>
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading AirWatch AI...</p>
+        </div>
+    </div>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -36,11 +47,15 @@
                 <a href="#about" class="nav-link">About</a>
             </div>
             
-            <div class="nav-actions">
-                <button class="btn-notification" id="notificationBtn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
+                <div class="nav-actions">
+                    <button class="btn-back" onclick="goBack()" title="Go Back">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back</span>
+                    </button>
+                    <button class="btn-notification" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
                 <div class="theme-toggle-container">
                     <button class="btn-theme-toggle" id="themeToggle">
                         <i class="fas fa-moon"></i>
@@ -552,12 +567,12 @@
 
     <!-- Scripts -->
     <script src="js/modern-ui.js"></script>
-    <script src="js/hero-animations.js"></script>
-    <script src="js/pollution-map.js"></script>
-    <script src="js/forecast-chart.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/theme-toggle.js"></script>
-    <script src="js/navigation-system.js"></script>
-    <script src="js/api.js"></script>
+    <script src="js/hero-animations.js" defer></script>
+    <script src="js/pollution-map.js" defer></script>
+    <script src="js/forecast-chart.js" defer></script>
+    <script src="js/notifications.js" defer></script>
+    <script src="js/theme-toggle.js" defer></script>
+    <script src="js/simple-navigation.js" defer></script>
+    <script src="js/realtime-data.js" defer></script>
 </body>
 </html>

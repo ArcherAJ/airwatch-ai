@@ -16,15 +16,25 @@ class ForecastChart {
             '48h': null,
             '72h': null
         };
+        this.isLoading = true;
         this.init();
     }
 
     init() {
         this.createCanvas();
-        this.loadData();
+        if (!this.canvas) {
+            console.error('Forecast chart canvas not found');
+            return;
+        }
+        
+        // Initialize with mock data immediately
+        this.generateAllMockData();
         this.setupControls();
         this.setupEventListeners();
         this.startAnimation();
+        
+        // Load real data in background
+        this.loadData();
     }
 
     createCanvas() {
@@ -47,12 +57,17 @@ class ForecastChart {
 
     async loadData() {
         try {
-            // Load data for all periods
+            // Load data for all periods with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // Reduced to 3 seconds
+            
             const responses = await Promise.all([
-                fetch('/api/forecasting/advanced-forecast'),
-                fetch('/api/forecasting/ai-forecast'),
-                fetch('/api/forecasting/seasonal-forecast')
+                fetch('/api/forecasting/advanced-forecast', { signal: controller.signal }),
+                fetch('/api/forecasting/ai-forecast', { signal: controller.signal }),
+                fetch('/api/forecasting/seasonal-forecast', { signal: controller.signal })
             ]);
+            
+            clearTimeout(timeoutId);
             
             const [advancedData, aiData, seasonalData] = await Promise.all(
                 responses.map(r => r.json())
@@ -60,7 +75,7 @@ class ForecastChart {
             
             this.processAllForecastData(advancedData, aiData, seasonalData);
         } catch (error) {
-            console.log('Using mock forecast data');
+            console.log('Using mock forecast data:', error);
             this.generateAllMockData();
         }
     }
@@ -76,21 +91,27 @@ class ForecastChart {
         this.forecastData['72h'] = this.process72HourData(seasonalData);
         
         this.data = this.forecastData[this.currentPeriod];
+        this.isLoading = false;
     }
 
     process24HourData(data) {
-        const predictions = data.forecasts['24_hour'].predictions || [];
+        const predictions = data?.forecasts?.['24_hour']?.predictions || [];
         const labels = [];
         const aqiData = [];
         const pm25Data = [];
         const pm10Data = [];
         const confidenceData = [];
         
+        // If no predictions, generate mock data
+        if (predictions.length === 0) {
+            return this.generateMockData('24h');
+        }
+        
         predictions.forEach((pred, index) => {
             const date = new Date(pred.timestamp);
             const hour = date.getHours();
             labels.push(`${hour}:00`);
-            aqiData.push(pred.aqi);
+            aqiData.push(pred.aqi || 250);
             pm25Data.push(pred.pm25 || pred.aqi * 0.4);
             pm10Data.push(pred.pm10 || pred.aqi * 0.6);
             confidenceData.push(pred.confidence || 85);
@@ -133,7 +154,7 @@ class ForecastChart {
     }
 
     process48HourData(data) {
-        const predictions = data.forecasts['48_hour']?.predictions || [];
+        const predictions = data?.forecasts?.['48_hour']?.predictions || [];
         const labels = [];
         const aqiData = [];
         const pm25Data = [];
@@ -191,7 +212,7 @@ class ForecastChart {
     }
 
     process72HourData(data) {
-        const predictions = data.forecasts['72_hour']?.predictions || [];
+        const predictions = data?.forecasts?.['72_hour']?.predictions || [];
         const labels = [];
         const aqiData = [];
         const pm25Data = [];
@@ -257,6 +278,7 @@ class ForecastChart {
         this.forecastData['48h'] = this.generateMockData('48h');
         this.forecastData['72h'] = this.generateMockData('72h');
         this.data = this.forecastData[this.currentPeriod];
+        this.isLoading = false;
     }
 
     generateMockData(period) {
@@ -358,22 +380,64 @@ class ForecastChart {
     draw() {
         if (!this.canvas || !this.ctx) return;
         
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        try {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            // Draw background
+            this.drawBackground();
+            
+            if (this.isLoading || !this.data) {
+                this.drawLoadingState();
+                return;
+            }
+            
+            // Draw grid
+            this.drawGrid();
+            
+            // Draw data
+            this.drawData();
+            
+            // Draw axes
+            this.drawAxes();
+            
+            // Draw legend
+            this.drawLegend();
+        } catch (error) {
+            console.error('Error drawing forecast chart:', error);
+            this.drawErrorState();
+        }
+    }
+
+    drawErrorState() {
+        if (!this.canvas || !this.ctx) return;
         
-        // Draw background
-        this.drawBackground();
+        this.ctx.fillStyle = '#ef4444';
+        this.ctx.font = '16px Inter, sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('Chart Error - Loading...', this.canvas.width / 2, this.canvas.height / 2);
+    }
+
+    drawLoadingState() {
+        if (!this.canvas || !this.ctx) return;
         
-        // Draw grid
-        this.drawGrid();
+        this.ctx.fillStyle = '#3b82f6';
+        this.ctx.font = '16px Inter, sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('Loading Forecast Data...', this.canvas.width / 2, this.canvas.height / 2);
         
-        // Draw data
-        this.drawData();
+        // Draw loading spinner
+        const time = Date.now() * 0.005;
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2 + 30;
+        const radius = 20;
         
-        // Draw axes
-        this.drawAxes();
-        
-        // Draw legend
-        this.drawLegend();
+        this.ctx.strokeStyle = '#3b82f6';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, radius, time, time + Math.PI * 1.5);
+        this.ctx.stroke();
     }
 
     drawBackground() {
@@ -705,7 +769,13 @@ class ForecastChart {
 
 // Initialize forecast chart when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.forecastChart = new ForecastChart();
+    console.log('Initializing Forecast Chart...');
+    try {
+        window.forecastChart = new ForecastChart();
+        console.log('Forecast Chart initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize Forecast Chart:', error);
+    }
 });
 
 // Add enhanced chart tooltip styles
